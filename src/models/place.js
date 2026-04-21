@@ -12,6 +12,11 @@ const placeSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    pictureUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

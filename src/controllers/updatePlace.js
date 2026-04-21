@@ -3,7 +3,7 @@ const Place = require("../models/place");
 const updatePlace = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, pictureUrl } = req.body;
 
     const updates = {};
 
@@ -15,6 +15,10 @@ const updatePlace = async (req, res, next) => {
       updates.description = description.trim();
     }
 
+    if (pictureUrl !== undefined) {
+      updates.pictureUrl = pictureUrl.trim();
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ message: "No valid fields to update" });
     }
@@ -22,7 +26,7 @@ const updatePlace = async (req, res, next) => {
     const place = await Place.findOneAndUpdate(
       { _id: id, user: req.user.id },
       updates,
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     );
 
     if (!place) {
