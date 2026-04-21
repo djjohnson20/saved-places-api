@@ -1,8 +1,13 @@
 const Place = require("../models/place");
+const mongoose = require("mongoose");
 
 const deletePlace = async (req, res, next) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid place id" });
+    }
 
     const place = await Place.findOneAndDelete({
       _id: id,
