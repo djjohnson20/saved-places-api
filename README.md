@@ -81,6 +81,33 @@ Authorization: Bearer <token>
 - `PATCH /places/:id` - Update one of the user’s saved places
 - `DELETE /places/:id` - Delete one of the user’s saved places
 
-## Status
+### `GET /places` Query Parameters
 
-In progress 🚧
+The `GET /places` route supports optional query parameters for filtering and pagination:
+
+- `search` - Search by place name or description
+- `hasImage=true` - Return only places with a `pictureUrl`
+- `hasImage=false` - Return only places without a `pictureUrl`
+- `page` - Page number for paginated results
+- `limit` - Number of results per page
+
+Example requests:
+
+```http
+GET /places?search=cafe
+GET /places?hasImage=true
+GET /places?page=1&limit=10
+GET /places?search=cafe&hasImage=true&page=1&limit=5
+```
+
+## Security
+
+- JWT authentication is required for protected place routes
+- Rate limiting is applied to auth routes and general API usage
+- Users can only access and modify their own saved places
+
+## Current Status
+
+The backend is functional and includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, and rate limiting.
+
+Planned improvements include deployment, expanded API documentation, and additional backend features.
