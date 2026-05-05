@@ -11,6 +11,13 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/places", apiLimiter, placeRoutes);
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Saved Places API is running 🚀",
+    status: "ok",
+  });
+});
+
 // test route
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
