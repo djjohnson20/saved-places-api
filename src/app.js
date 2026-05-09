@@ -13,7 +13,7 @@ app.use("/places", apiLimiter, placeRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Saved Places API is running 🚀",
+    message: "Saved Places API is running",
     status: "ok",
   });
 });

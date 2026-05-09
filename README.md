@@ -2,6 +2,11 @@
 
 This is a REST API for managing saved places. Users can sign up and log in. Authenticated users can create, read, update, and delete their own saved places. Places support images, search, filtering, and pagination.
 
+## Live API
+
+- Base URL: `https://saved-places-api.onrender.com`
+- Health check: `https://saved-places-api.onrender.com/health`
+
 ## Features
 
 - User signup and login
@@ -13,7 +18,7 @@ This is a REST API for managing saved places. Users can sign up and log in. Auth
 - Filter places by image presence
 - Pagination for `GET /places`
 - JSON error handling
-- Rate limiting on auth routes
+- Rate limiting on auth routes and general API usage
 
 ## Tech Stack
 
@@ -63,6 +68,11 @@ JWT_SECRET=your_jwt_secret_here
 
 ## API Overview
 
+### General Routes
+
+- `GET /` - Returns a simple API status message
+- `GET /health` - Returns a health check response
+
 ### Auth Routes
 
 - `POST /auth/signup` - Register a new user
@@ -78,6 +88,7 @@ Authorization: Bearer <token>
 
 - `POST /places` - Create a new saved place
 - `GET /places` - Get the authenticated user’s places
+- `GET /places/:id` - Get one saved place by id
 - `PATCH /places/:id` - Update one of the user’s saved places
 - `DELETE /places/:id` - Delete one of the user’s saved places
 
@@ -108,6 +119,6 @@ GET /places?search=cafe&hasImage=true&page=1&limit=5
 
 ## Current Status
 
-The backend is functional and includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, and rate limiting.
+The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, rate limiting, and a production-ready root route.
 
-Planned improvements include deployment, expanded API documentation, and additional backend features.
+Planned improvements include expanded API documentation, additional backend features, and further production polish.
