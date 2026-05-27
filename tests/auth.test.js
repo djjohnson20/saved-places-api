@@ -12,3 +12,75 @@ describe("POST /auth/login", () => {
     expect(response.body.message).toBe("Email and password are required");
   });
 });
+
+describe("POST /auth/signup", () => {
+  it("should create a new user and return a token", async () => {
+    const response = await request(app).post("/auth/signup").send({
+      email: "test@example.com",
+      password: "password123",
+      name: "Test User",
+    });
+
+    expect(response.status).toBe(201);
+    expect(response.body.token).toBeDefined();
+    expect(response.body.user.email).toBe("test@example.com");
+    expect(response.body.user.name).toBe("Test User");
+  });
+});
+
+describe("POST /auth/login", () => {
+  it("should log in an existing user and return a token", async () => {
+    await request(app).post("/auth/signup").send({
+      email: "login@example.com",
+      password: "password123",
+      name: "Login User",
+    });
+
+    const response = await request(app).post("/auth/login").send({
+      email: "login@example.com",
+      password: "password123",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.token).toBeDefined();
+    expect(response.body.user.email).toBe("login@example.com");
+    expect(response.body.user.name).toBe("Login User");
+  });
+});
+
+describe("POST /auth/login", () => {
+  it("should return 401 for invalid credentials", async () => {
+    await request(app).post("/auth/signup").send({
+      email: "wrongpass@example.com",
+      password: "password123",
+      name: "Wrong Pass User",
+    });
+
+    const response = await request(app).post("/auth/login").send({
+      email: "wrongpass@example.com",
+      password: "wrongpassword",
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Invalid credentials");
+  });
+});
+
+describe("POST /auth/signup", () => {
+  it("should return 400 if the email is already in use", async () => {
+    await request(app).post("/auth/signup").send({
+      email: "duplicate@example.com",
+      password: "password123",
+      name: "First User",
+    });
+
+    const response = await request(app).post("/auth/signup").send({
+      email: "duplicate@example.com",
+      password: "password123",
+      name: "Second User",
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("Email already in use");
+  });
+});
