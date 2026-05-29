@@ -164,3 +164,42 @@ describe("GET /places/:id", () => {
     expect(response.body.message).toBe("Place not found");
   });
 });
+
+describe("PATCH /places/:id", () => {
+  it("should update a place for the authenticated user", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "updateplace@example.com",
+      password: "password123",
+      name: "Update Place User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const createResponse = await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Old Place Name",
+        description: "Old description",
+        pictureUrl:
+          "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+      });
+
+    const placeId = createResponse.body._id;
+
+    const response = await request(app)
+      .patch(`/places/${placeId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Place Name",
+        description: "Updated description",
+        pictureUrl: "https://example.com/new-image.jpg",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body._id).toBe(placeId);
+    expect(response.body.name).toBe("Updated Place Name");
+    expect(response.body.description).toBe("Updated description");
+    expect(response.body.pictureUrl).toBe("https://example.com/new-image.jpg");
+  });
+});
