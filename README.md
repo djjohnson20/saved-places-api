@@ -19,6 +19,7 @@ This is a REST API for managing saved places. Users can sign up and log in. Auth
 - Pagination for `GET /places`
 - JSON error handling
 - Rate limiting on auth routes and general API usage
+- Automated integration tests for auth and places routes
 
 ## Tech Stack
 
@@ -30,6 +31,9 @@ This is a REST API for managing saved places. Users can sign up and log in. Auth
 - `bcryptjs`
 - `express-rate-limit`
 - `dotenv`
+- `jest`
+- `supertest`
+- `mongodb-memory-server`
 
 ## Setup
 
@@ -54,6 +58,12 @@ Add your environment variables before starting the server.
 
 ```bash
 npm start
+```
+
+5. Run the test suite
+
+```bash
+npm test
 ```
 
 ## Environment Variables
@@ -116,6 +126,20 @@ GET /places?search=cafe&hasImage=true&page=1&limit=5
 - JWT authentication is required for protected place routes
 - Rate limiting is applied to auth routes and general API usage
 - Users can only access and modify their own saved places
+
+## Testing
+
+The project includes automated integration tests using `jest`, `supertest`, and `mongodb-memory-server`.
+
+Current test coverage includes:
+
+- Auth validation
+- Signup success and duplicate signup handling
+- Login success and invalid credential handling
+- Protected route access without a token
+- Place creation, retrieval, update, and deletion
+- Invalid place id validation
+- Not found responses for place routes
 
 ## Current Status
 

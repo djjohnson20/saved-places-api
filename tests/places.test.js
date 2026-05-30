@@ -203,3 +203,116 @@ describe("PATCH /places/:id", () => {
     expect(response.body.pictureUrl).toBe("https://example.com/new-image.jpg");
   });
 });
+
+describe("DELETE /places/:id", () => {
+  it("should delete a place for the authenticated user", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "deleteplace@example.com",
+      password: "password123",
+      name: "Delete Place User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const createResponse = await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Place To Delete",
+        description: "This place will be deleted",
+        pictureUrl:
+          "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+      });
+
+    const placeId = createResponse.body._id;
+
+    const response = await request(app)
+      .delete(`/places/${placeId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Place deleted successfully");
+  });
+});
+
+describe("PATCH /places/:id", () => {
+  it("should return 400 for an invalid place id when authenticated", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "patchinvalid@example.com",
+      password: "password123",
+      name: "Patch Invalid User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/places/abc123")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Name",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("Invalid place id");
+  });
+});
+
+describe("PATCH /places/:id", () => {
+  it("should return 404 when the place does not exist", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "patchnotfound@example.com",
+      password: "password123",
+      name: "Patch Not Found User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/places/507f1f77bcf86cd799439011")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Name",
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Place not found");
+  });
+});
+
+describe("DELETE /places/:id", () => {
+  it("should return 400 for an invalid place id when authenticated", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "deleteinvalid@example.com",
+      password: "password123",
+      name: "Delete Invalid User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .delete("/places/abc123")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("Invalid place id");
+  });
+});
+
+describe("DELETE /places/:id", () => {
+  it("should return 404 when the place does not exist", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "deletenotfound@example.com",
+      password: "password123",
+      name: "Delete Not Found User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .delete("/places/507f1f77bcf86cd799439011")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe("Place not found");
+  });
+});
