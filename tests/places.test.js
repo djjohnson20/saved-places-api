@@ -316,3 +316,123 @@ describe("DELETE /places/:id", () => {
     expect(response.body.message).toBe("Place not found");
   });
 });
+
+describe("GET /places with search", () => {
+  it("should return only places that match the search term", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "searchtest@example.com",
+      password: "password123",
+      name: "Search Test User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Coffee Spot",
+        description: "Best espresso in town",
+        pictureUrl: "",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Autorization", `Bearer ${token}`)
+      .send({
+        name: "Bookstore",
+        description: "Quiet reading place",
+        pictureUrl: "",
+      });
+
+    const response = await request(app)
+      .get("/places?search=coffee")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.places).toHaveLength(1);
+    expect(response.body.places[0].name).toBe("Coffee Spot");
+  });
+});
+
+describe("GET /places with hesImage=true", () => {
+  it("should return only places that have an image", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "hasimage@example.com",
+      password: "password123",
+      name: "Has Image User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Cafe With Image",
+        description: "A nice cafe with a photo.",
+        pictureUrl:
+          "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Cafe Without Image",
+        description: "A nice cafe without a photo.",
+        pictureUrl: "",
+      });
+
+    const response = await request(app)
+      .get("/places?hasImage=true")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.places).toHaveLength(1);
+    expect(response.body.places[0].name).toBe("Cafe With Image");
+  });
+});
+
+describe("GET /places with pagination", () => {
+  it("should return paginated results with correct metadata", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "pagination@example.com",
+      password: "password123",
+      name: "Pagination User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "First Place",
+        description: "First test place",
+        pictureUrl: "",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Second Place",
+        description: "Second test place",
+        pictureUrl: "",
+      });
+
+    const response = await request(app)
+      .get("/places?page=1&limit=1")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.page).toBe(1);
+    expect(response.body.limit).toBe(1);
+    expect(response.body.total).toBe(2);
+    expect(response.body.pages).toBe(2);
+    expect(response.body.places).toHaveLength(1);
+  });
+});

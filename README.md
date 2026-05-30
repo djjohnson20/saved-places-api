@@ -140,9 +140,11 @@ Current test coverage includes:
 - Place creation, retrieval, update, and deletion
 - Invalid place id validation
 - Not found responses for place routes
+- Search filtering
+- Pagination behavior
 
 ## Current Status
 
-The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, rate limiting, and a production-ready root route.
+The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, rate limiting, and automated integration tests for auth and places routes.
 
 Planned improvements include expanded API documentation, additional backend features, and further production polish.
