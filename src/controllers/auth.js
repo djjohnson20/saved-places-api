@@ -85,4 +85,24 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, login };
+const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { signup, login, getMe };
