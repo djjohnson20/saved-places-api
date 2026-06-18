@@ -84,3 +84,68 @@ describe("POST /auth/signup", () => {
     expect(response.body.message).toBe("Email already in use");
   });
 });
+
+describe("PATCH /auth/me", () => {
+  it("should update the authenticated user's name", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "updateme@example.com",
+      password: "password123",
+      name: "Original Name",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Name",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.user.email).toBe("updateme@example.com");
+    expect(response.body.user.name).toBe("Updated Name");
+    expect(response.body.user.id).toBeDefined();
+  });
+});
+
+describe("PATCH /auth/me", () => {
+  it("should return 400 if no valid fields are provided", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "emptyupdate@example.com",
+      password: "password123",
+      name: "Empty Update User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("No valid fields to update");
+  });
+});
+
+describe("GET /auth/me", () => {
+  it("should return the authenticated user's profile", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "getme@example.com",
+      password: "password123",
+      name: "Get Me User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .get("/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.user.email).toBe("getme@example.com");
+    expect(response.body.user.name).toBe("Get Me User");
+    expect(response.body.user.id).toBeDefined();
+  });
+});

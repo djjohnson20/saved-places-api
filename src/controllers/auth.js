@@ -105,4 +105,39 @@ const getMe = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, login, getMe };
+const updateMe = async (req, res, next) => {
+  try {
+    const { name } = req.body;
+
+    const updates = {};
+
+    if (name !== undefined) {
+      updates.name = name.trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No valid fields to update" });
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.id, updates, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { signup, login, getMe, updateMe };
