@@ -149,3 +149,81 @@ describe("GET /auth/me", () => {
     expect(response.body.user.id).toBeDefined();
   });
 });
+
+describe("PATCH /auth/change-password", () => {
+  it("should change the authenticated user's password", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "changepassword@example.com",
+      password: "oldpassword123",
+      name: "Change Password User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/auth/change-password")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        currentPassword: "oldpassword123",
+        newPassword: "newpassword123",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Password updated successfully");
+
+    const loginResponse = await request(app).post("/auth/login").send({
+      email: "changepassword@example.com",
+      password: "newpassword123",
+    });
+
+    expect(loginResponse.status).toBe(200);
+    expect(loginResponse.body.token).toBeDefined();
+  });
+});
+
+describe("PATCH /auth/change-password", () => {
+  it("should return 401 when the current password is incorrect", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "wrongcurrentpassword@example.com",
+      password: "oldpassword123",
+      name: "Wrong Current Password User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/auth/change-password")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        currentPassword: "wrongpassword",
+        newPassword: "newpassword123",
+      });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Current password is incorrect");
+  });
+});
+
+describe("PATCH /auth/change-password", () => {
+  it("should return 400 if current password or new password is missing", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "missingpasswordfields@example.com",
+      password: "oldpassword123",
+      name: "Missing Password Fields User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .patch("/auth/change-password")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        currentPassword: "oldpassword123",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe(
+      "Current password and new password are required",
+    );
+  });
+});
