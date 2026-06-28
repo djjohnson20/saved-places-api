@@ -9,7 +9,13 @@ const updatePlace = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid place id" });
     }
 
-    const { name, description, pictureUrl } = req.body;
+    const { name, description, pictureUrl, isFavorite } = req.body;
+
+    if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
+      return res.status(400).json({
+        message: "isFavorite must be a boolean",
+      });
+    }
 
     const updates = {};
 
@@ -23,6 +29,10 @@ const updatePlace = async (req, res, next) => {
 
     if (pictureUrl !== undefined) {
       updates.pictureUrl = pictureUrl.trim();
+    }
+
+    if (isFavorite !== undefined) {
+      updates.isFavorite = isFavorite;
     }
 
     if (Object.keys(updates).length === 0) {

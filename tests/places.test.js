@@ -37,6 +37,7 @@ describe("POST /places", () => {
         description: "Great place to work and drink espresso",
         pictureUrl:
           "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+        isFavorite: true,
       });
 
     expect(response.status).toBe(201);
@@ -49,6 +50,7 @@ describe("POST /places", () => {
     );
     expect(response.body.user).toBeDefined();
     expect(response.body._id).toBeDefined();
+    expect(response.body.isFavorite).toBe(true);
   });
 });
 
@@ -183,6 +185,7 @@ describe("PATCH /places/:id", () => {
         description: "Old description",
         pictureUrl:
           "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+        isFavorite: true,
       });
 
     const placeId = createResponse.body._id;
@@ -194,6 +197,7 @@ describe("PATCH /places/:id", () => {
         name: "Updated Place Name",
         description: "Updated description",
         pictureUrl: "https://example.com/new-image.jpg",
+        isFavorite: false,
       });
 
     expect(response.status).toBe(200);
@@ -201,6 +205,7 @@ describe("PATCH /places/:id", () => {
     expect(response.body.name).toBe("Updated Place Name");
     expect(response.body.description).toBe("Updated description");
     expect(response.body.pictureUrl).toBe("https://example.com/new-image.jpg");
+    expect(response.body.isFavorite).toBe(false);
   });
 });
 
@@ -338,7 +343,7 @@ describe("GET /places with search", () => {
 
     await request(app)
       .post("/places")
-      .set("Autorization", `Bearer ${token}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({
         name: "Bookstore",
         description: "Quiet reading place",
@@ -434,5 +439,68 @@ describe("GET /places with pagination", () => {
     expect(response.body.total).toBe(2);
     expect(response.body.pages).toBe(2);
     expect(response.body.places).toHaveLength(1);
+  });
+});
+
+describe("GET /places with favorite=true", () => {
+  it("should return only favorite places", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "favorites@example.com",
+      password: "password123",
+      name: "Favorites User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Favorite Cafe",
+        description: "A favorite place",
+        isFavorite: true,
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Regular Cafe",
+        description: "Not a favorite place",
+        isFavorite: false,
+      });
+
+    const response = await request(app)
+      .get("/places?favorite=true")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.places).toHaveLength(1);
+    expect(response.body.places[0].name).toBe("Favorite Cafe");
+    expect(response.body.places[0].isFavorite).toBe(true);
+  });
+});
+
+describe("POST /places", () => {
+  it("should reject a non-boolean isFavorite value", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "invalidfavorite@example.com",
+      password: "password123",
+      name: "Invalid Favorite User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Test Place",
+        isFavorite: "true",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("isFavorite must be a boolean");
   });
 });

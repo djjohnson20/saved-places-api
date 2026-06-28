@@ -2,7 +2,7 @@ const Place = require("../models/place");
 
 const getPlaces = async (req, res, next) => {
   try {
-    const { search, hasImage, page, limit } = req.query;
+    const { search, hasImage, favorite, page, limit } = req.query;
 
     const query = { user: req.user.id };
 
@@ -19,6 +19,14 @@ const getPlaces = async (req, res, next) => {
 
     if (hasImage === "false") {
       query.pictureUrl = "";
+    }
+
+    if (favorite === "true") {
+      query.isFavorite = true;
+    }
+
+    if (favorite === "false") {
+      query.isFavorite = false;
     }
 
     const pageNumber = Math.max(Number(page) || 1, 1);

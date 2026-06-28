@@ -17,6 +17,10 @@ const placeSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    isFavorite: {
+      type: Boolean,
+      default: false,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

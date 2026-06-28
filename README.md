@@ -1,6 +1,6 @@
 # Saved Places API
 
-This is a REST API for managing saved places. Users can sign up and log in. Authenticated users can create, read, update, and delete their own saved places. Places support images, search, filtering, and pagination.
+This is a REST API for managing saved places. Users can sign up and log in. Authenticated users can create, read, update, and delete their own saved places. Places support images, favorites, search, filtering, and pagination.
 
 ## Live API
 
@@ -20,6 +20,8 @@ This is a REST API for managing saved places. Users can sign up and log in. Auth
 - JSON error handling
 - Rate limiting on auth routes and general API usage
 - Automated integration tests for auth and places routes
+- Mark places as favorites
+- Filter places by favorite status
 
 ## Tech Stack
 
@@ -111,6 +113,8 @@ The `GET /places` route supports optional query parameters for filtering and pag
 - `hasImage=false` - Return only places without a `pictureUrl`
 - `page` - Page number for paginated results
 - `limit` - Number of results per page
+- `favorite=true` - Return only favorite places
+- `favorite=false` - Return only non-favorite places
 
 Example requests:
 
@@ -118,7 +122,10 @@ Example requests:
 GET /places?search=cafe
 GET /places?hasImage=true
 GET /places?page=1&limit=10
+GET /places?favorite=true
+GET /places?favorite=false
 GET /places?search=cafe&hasImage=true&page=1&limit=5
+GET /places?search=cafe&favorite=true&page=1&limit=5
 ```
 
 ## Security
@@ -142,9 +149,10 @@ Current test coverage includes:
 - Not found responses for place routes
 - Search filtering
 - Pagination behavior
+- Favorite creation, updates, filtering, and validation
 
 ## Current Status
 
-The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, search, filtering, pagination, image URL support, rate limiting, and automated integration tests for auth and places routes.
+The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, favorites, search, filtering, pagination, image URL support, rate limiting, and automated integration tests for auth and places routes.
 
 Planned improvements include expanded API documentation, additional backend features, and further production polish.
