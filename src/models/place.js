@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { PLACE_STATUSES } = require("../constants/placeStatuses");
 
 const placeSchema = new mongoose.Schema(
   {
@@ -20,6 +21,11 @@ const placeSchema = new mongoose.Schema(
     isFavorite: {
       type: Boolean,
       default: false,
+    },
+    status: {
+      type: String,
+      enum: PLACE_STATUSES,
+      default: "want-to-visit",
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

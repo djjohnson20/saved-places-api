@@ -1,8 +1,9 @@
 const Place = require("../models/place");
+const { PLACE_STATUSES } = require("../constants/placeStatuses");
 
 const createPlace = async (req, res, next) => {
   try {
-    const { name, description, pictureUrl, isFavorite } = req.body;
+    const { name, description, pictureUrl, isFavorite, status } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Name is required" });
@@ -14,11 +15,18 @@ const createPlace = async (req, res, next) => {
       });
     }
 
+    if (status !== undefined && !PLACE_STATUSES.includes(status)) {
+      return res.status(400).json({
+        message: "Status must be want-to-visit or visited",
+      });
+    }
+
     const place = await Place.create({
       name: name.trim(),
       description: description ? description.trim() : "",
       pictureUrl: pictureUrl ? pictureUrl.trim() : "",
       isFavorite,
+      status,
       user: req.user.id,
     });
 

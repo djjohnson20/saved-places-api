@@ -1,10 +1,17 @@
 const Place = require("../models/place");
+const { PLACE_STATUSES } = require("../constants/placeStatuses");
 
 const getPlaces = async (req, res, next) => {
   try {
-    const { search, hasImage, favorite, page, limit } = req.query;
+    const { search, hasImage, favorite, status, page, limit } = req.query;
 
     const query = { user: req.user.id };
+
+    if (status !== undefined && !PLACE_STATUSES.includes(status)) {
+      return res.status(400).json({
+        message: "Status must be want-to-visit or visited",
+      });
+    }
 
     if (search && search.trim()) {
       query.$or = [
@@ -27,6 +34,10 @@ const getPlaces = async (req, res, next) => {
 
     if (favorite === "false") {
       query.isFavorite = false;
+    }
+
+    if (status !== undefined) {
+      query.status = status;
     }
 
     const pageNumber = Math.max(Number(page) || 1, 1);
