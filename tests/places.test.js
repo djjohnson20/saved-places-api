@@ -51,6 +51,7 @@ describe("POST /places", () => {
     expect(response.body.user).toBeDefined();
     expect(response.body._id).toBeDefined();
     expect(response.body.isFavorite).toBe(true);
+    expect(response.body.status).toBe("want-to-visit");
   });
 });
 
@@ -117,15 +118,12 @@ describe("GET /places/:id", () => {
       .get(`/places/${placeId}`)
       .set("Authorization", `Bearer ${token}`);
 
-    const getResponse = await request(app)
-      .get(`/places/${placeId}`)
-      .set("Authorization", `Bearer ${token}`);
-
     expect(response.status).toBe(200);
     expect(response.body._id).toBe(placeId);
     expect(response.body.name).toBe("Favorite Bookstore");
     expect(response.body.description).toBe("Quiet place with a coffee corner.");
     expect(response.body.user).toBeDefined();
+    expect(response.body.status).toBe("want-to-visit");
   });
 });
 
@@ -198,6 +196,7 @@ describe("PATCH /places/:id", () => {
         description: "Updated description",
         pictureUrl: "https://example.com/new-image.jpg",
         isFavorite: false,
+        status: "visited",
       });
 
     expect(response.status).toBe(200);
@@ -206,6 +205,7 @@ describe("PATCH /places/:id", () => {
     expect(response.body.description).toBe("Updated description");
     expect(response.body.pictureUrl).toBe("https://example.com/new-image.jpg");
     expect(response.body.isFavorite).toBe(false);
+    expect(response.body.status).toBe("visited");
   });
 });
 
@@ -502,5 +502,143 @@ describe("POST /places", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("isFavorite must be a boolean");
+  });
+});
+
+describe("POST /places", () => {
+  it("should create a place with an explicit status", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "explicitstatus@example.com",
+      password: "password123",
+      name: "Explicit Status User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Visited Cafe",
+        description: "Already visited",
+        status: "visited",
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.name).toBe("Visited Cafe");
+    expect(response.body.status).toBe("visited");
+  });
+});
+
+describe("POST /places", () => {
+  it("should reject an invalid status", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "invalidstatus@example.com",
+      password: "password123",
+      name: "Invalid Status User",
+    });
+
+    const token = signupResponse.body.token;
+
+    const response = await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Invalid Status Place",
+        status: "maybe",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe(
+      "Status must be want-to-visit or visited",
+    );
+  });
+});
+
+describe("GET /places with status=visited", () => {
+  it("should return only visited places", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "statusfilter@example.com",
+      password: "password123",
+      name: "Status Filter User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Visited Cafe",
+        status: "visited",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Future Cafe",
+        status: "want-to-visit",
+      });
+
+    const response = await request(app)
+      .get("/places?status=visited")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.places).toHaveLength(1);
+    expect(response.body.places[0].name).toBe("Visited Cafe");
+    expect(response.body.places[0].status).toBe("visited");
+  });
+});
+
+describe("GET /places with combined filters", () => {
+  it("should combine search, favorite, and status filters", async () => {
+    const signupResponse = await request(app).post("/auth/signup").send({
+      email: "combinedfilters@example.com",
+      password: "password123",
+      name: "Combined Filters User",
+    });
+
+    const token = signupResponse.body.token;
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Favorite Coffee Shop",
+        isFavorite: true,
+        status: "visited",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Regular Coffee Shop",
+        isFavorite: false,
+        status: "visited",
+      });
+
+    await request(app)
+      .post("/places")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Future Coffee Shop",
+        isFavorite: true,
+        status: "want-to-visit",
+      });
+
+    const response = await request(app)
+      .get("/places?search=coffee&favorite=true&status=visited&page=1&limit=5")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.places).toHaveLength(1);
+    expect(response.body.places[0].name).toBe("Favorite Coffee Shop");
+    expect(response.body.places[0].isFavorite).toBe(true);
+    expect(response.body.places[0].status).toBe("visited");
   });
 });

@@ -22,6 +22,8 @@ This is a REST API for managing saved places. Users can sign up and log in. Auth
 - Automated integration tests for auth and places routes
 - Mark places as favorites
 - Filter places by favorite status
+- Track places as `want-to-visit` or `visited`
+- Filter places by visit status
 
 ## Tech Stack
 
@@ -104,6 +106,33 @@ Authorization: Bearer <token>
 - `PATCH /places/:id` - Update one of the user’s saved places
 - `DELETE /places/:id` - Delete one of the user’s saved places
 
+### Place Status
+
+Places support these status values:
+
+- `want-to-visit` - Default value for new places
+- `visited` - The user has visited the place
+
+Example create request:
+
+```json
+{
+  "name": "Favorite Cafe",
+  "description": "Great coffee",
+  "pictureUrl": "https://example.com/cafe.jpg",
+  "isFavorite": true,
+  "status": "visited"
+}
+```
+
+Example status update:
+
+```json
+{
+  "status": "visited"
+}
+```
+
 ### `GET /places` Query Parameters
 
 The `GET /places` route supports optional query parameters for filtering and pagination:
@@ -115,6 +144,8 @@ The `GET /places` route supports optional query parameters for filtering and pag
 - `limit` - Number of results per page
 - `favorite=true` - Return only favorite places
 - `favorite=false` - Return only non-favorite places
+- `status=visited` - Return only visited places
+- `status=want-to-visit` - Return only places the user wants to visit
 
 Example requests:
 
@@ -126,6 +157,9 @@ GET /places?favorite=true
 GET /places?favorite=false
 GET /places?search=cafe&hasImage=true&page=1&limit=5
 GET /places?search=cafe&favorite=true&page=1&limit=5
+GET /places?status=visited
+GET /places?status=want-to-visit
+GET /places?search=coffee&favorite=true&status=visited&page=1&limit=5
 ```
 
 ## Security
@@ -150,9 +184,11 @@ Current test coverage includes:
 - Search filtering
 - Pagination behavior
 - Favorite creation, updates, filtering, and validation
+- Place status defaults, validation, updates, and filtering
+- Combined search, favorite, and status filtering
 
 ## Current Status
 
-The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, favorites, search, filtering, pagination, image URL support, rate limiting, and automated integration tests for auth and places routes.
+The API is deployed and live on Render. The backend currently includes authentication, protected CRUD routes, favorites, visit-status tracking, search, filtering, pagination, image URL support, rate limiting, and automated integration tests for auth and places routes.
 
 Planned improvements include expanded API documentation, additional backend features, and further production polish.
